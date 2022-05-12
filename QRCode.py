@@ -93,20 +93,48 @@ def rotate(m):
             for j in range(len(m)):
                 m[i][j] = m[len(m)-j-1][i]
 
-def decimalToBinary():
     
+def decimalToBinary3bits(n):
+    res = []
+    n = bin(n).replace("0b", "")
+    while len(n) < 3:
+        n = '0' + n
+    for e in n:
+        res.append(e)
+    return res
+
 
 
 def correction(l):
-    l_aux = []
+    l_pos = []
+    l_bin = []
+    aux = 0
     for i in range(len(l)):
         if l[i] == 1:
             print(len(l) - i)
-            l_aux.append(len(l)-i)
+            l_pos.append(len(l)-i)
+    for e in l_pos:
+        l_bin.append(decimalToBinary3bits(e))
+    for i in range(len(l_bin)):
+        pair = 0
+        for j in range(len(l_bin)):
+            pair += l_bin[j][i]
+        if pair % 2 != 0:
+            if i == 0:
+                aux += 4
+            if i == 1:
+                aux += 2
+            else:
+                aux += 1
+    if aux != 0:
+        
+    
+
     
     
-correction([1, 1, 0, 0, 0, 1, 0])
-    
+#correction([1, 1, 0, 0, 0, 1, 0])
+print(decimalToBinary3bits(3))
+ 
 
 
         
