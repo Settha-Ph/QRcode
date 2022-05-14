@@ -6,6 +6,31 @@ from PIL import ImageTk
 from tkinter import filedialog
 from tkinter import simpledialog
 import numpy as np
+from copy import deepcopy
+
+
+def nbrCol(matrice):
+    return(len(matrice[0]))
+
+def nbrLig(matrice):
+    return len(matrice)
+    
+def saving(matPix, filename):#sauvegarde l'image contenue dans matpix dans le fichier filename
+							 #utiliser une extension png pour que la fonction fonctionne sans perte d'information
+    toSave=pil.Image.new(mode = "1", size = (nbrCol(matPix),nbrLig(matPix)))
+    for i in range(nbrLig(matPix)):
+        for j in range(nbrCol(matPix)):
+            toSave.putpixel((j,i),matPix[i][j])
+    toSave.save(filename)
+
+def loading(filename):#charge le fichier image filename et renvoie une matrice de 0 et de 1 qui représente 
+					  #l'image en noir et blanc
+    toLoad=pil.Image.open(filename)
+    m=[[0]*toLoad.size[0] for k in range(toLoad.size[1])]
+    for i in range(toLoad.size[1]):
+        for j in range(toLoad.size[0]):
+            m[i][j]= 0 if toLoad.getpixel((j,i)) == 0 else 1
+    return m
 
 
 QRMatrix = [[0 for j in range(25)] for i in range(25)]
@@ -36,7 +61,7 @@ def squareInQrcode(m):
                 else:
                     m[i][j] = 1
                     m[i][len(m)-1-j] = 1
-        elif (i >= len(m)-5 and i <= len(m)-2):
+        elif (i >= len(m)-5 and i <= len(m)-3):
             for j in range(7):
                 if j == 1 or j == 5:
                     continue
@@ -50,7 +75,7 @@ def squareInQrcode(m):
         elif i == len(m)-6 or i == len(m)-2:
             m[i][0] = 1
             m[i][6] = 1
-        
+
 
 def _rotate(m):
     """vérification du sens de la matrice"""
@@ -103,7 +128,40 @@ def decimalToBinary3bits(n):
         res.append(e)
     return res
 
+def code_de_Hamming(liste=[]):
+    """
+    Fonction qui va prendre en paramètre une liste de 7 bits
+    et va vérifier s'il y a ou non une erreur 
+    si oui il va la corriger
+    Va retourner les 4 bits d'informations et également la liste avec mofication erreur si il y en a une.
+    Réutilisation de la fonction que l'on a travailler en TD.
+    """
+    liste_message = []
+    # Calcul des bits de parités. 
+    # Regarde si ils ont la bonne valeur
+    c_1=(liste[4] == (liste[0] + liste[1] + liste[3])%2)
+    c_2=(liste[5] == (liste[0] + liste[2] + liste[3])%2)
+    c_3=(liste[6] == (liste[1] + liste[2] + liste[3])%2)
+    
+    # Si un des ou plusieurs bits de parité à une valeur différente ont va modifier le bit erroné
+    if(not c_1 and not c_2 and not c_3):
+        liste[3]=(liste[3]+1)%2
+    elif(not c_1 and not c_2):
+        liste[0]=(liste[0]+1)%2
+    elif(not c_1 and not c_3):
+        liste[1]=(liste[1]+1)%2
+    elif(not c_2 and not c_3):
+        liste[2]=(liste[2]+1)%2
+    elif(not c_1):
+        liste[4]=(liste[4]+1)%2
+    elif(not c_2):
+        liste[5]=(liste[5]+1)%2
+    elif(not c_3):
+        liste[6]=(liste[6]+1)%2
 
+    for i in range(4): 
+        liste_message.append(liste[i])
+    return liste_message
 
 def correction(l):
     l_pos = []
@@ -127,8 +185,32 @@ def correction(l):
             else:
                 aux += 1
     if aux != 0:
-        
-    
+        return i
+
+
+def conversion_binaire_entier(liste_donnees):
+    """
+    Fonction qui va convertir une listes de bits en un entier
+    Réutilisation d'une fonction que l'on a vu en TP. 
+    """
+    nombre_entier = 0
+    for a in range(len(liste_donnees)):
+        nombre_entier += (liste_donnees[a]*(2**(len(liste_donnees)-a-1)))
+    return nombre_entier
+
+
+
+def decoupage46bits(listebits, nbr_elements):
+    """ 
+    Va découper la liste en différentes partie avec juste
+    4 éléments par partie.
+    Retourne la liste des différentes parties. 
+    """
+    res = []
+    for i in range(0, len(listebits), nbr_elements):
+        res.append(listebits[i:(i+nbr_elements)])
+  
+    return res      
 
     
     
@@ -148,5 +230,5 @@ def printBeautifulMatrice(a):
 
 
 
-#QRSkeleton(QRMatrix)
-#printBeautifulMatrice(QRMatrix)
+QRSkeleton(QRMatrix)
+printBeautifulMatrice(QRMatrix)
