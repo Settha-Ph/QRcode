@@ -78,46 +78,66 @@ def squareInQrcode(m):
             m[i][6] = 1
 
 
-def _rotate(m):
+def _rotate():
     """vérification du sens de la matrice"""
+    global QRMatrix
     res = True
-    n = len(m)-1
-    for i in range(7):
-        for j in range(7):
+    n = len(QRMatrix)-1
+    for i in range(len(QRMatrix)-1, len(QRMatrix)):
+        for j in range(len(QRMatrix)-1, len(QRMatrix)):
             if i == n-6 or i == n:
-                if m[i][j] != 1:
+                if QRMatrix[i][j] != 1:
                     res = False
                     break
             elif i == n-5 or i == n-1:
                 if j == n-6 or j == n:
-                    if m[i][j] != 1:
+                    if QRMatrix[i][j] != 1:
                         res = False
                         break
                 elif j >=n-5 and j <= n-1:
-                    if m[i][j] != 0:
+                    if QRMatrix[i][j] != 0:
                         res = False
                         break
             elif i >= n-4 and i <= n-2:
                 if j == n-6 or j == n or (j >=n-4 and j <= n-2):
-                    if m[i][j] != 1:
+                    if QRMatrix[i][j] != 1:
                         res = False
                         break
                 else:
-                    if m[i][j] != 0:
+                    if QRMatrix[i][j] != 0:
                         res = False
                         break
 
         if not res:
             break
+    print(res)
     return res
 
-
-def rotate(m):
+def rotate():
+    global QRMatrix
     """rotation à droite de la matrice tant qu'elle n'est pas dans le bon sens"""
-    while not _rotate(m):
-        for i in range(len(m)):
-            for j in range(len(m)):
-                m[i][j] = m[len(m)-j-1][i]
+    aux = [[0] *(len(QRMatrix)) for j in range(len(QRMatrix))]
+    while not _rotate():
+        for i in range(len(QRMatrix)):
+            for j in range(len(QRMatrix)):
+                aux[i][j] = QRMatrix[len(QRMatrix)-j-1][i]
+
+    QRMatrix = aux.copy()
+    return QRMatrix    
+
+
+def rotate2():
+    global QRMatrix
+    """rotation à droite de la matrice tant qu'elle n'est pas dans le bon sens"""
+    aux = [[0] *(len(QRMatrix)) for j in range(len(QRMatrix))]
+
+    for i in range(len(QRMatrix)):
+        for j in range(len(QRMatrix)):
+            aux[i][j] = QRMatrix[len(QRMatrix)-j-1][i]
+
+    QRMatrix = aux.copy()
+    return QRMatrix
+  
 
     
 def decimalToBinary3bits(n):
@@ -192,18 +212,17 @@ def correction(l):
     return [l[0], [1], l[2], l[4]]
 
 
-def readImage(m):
+def readBlock(m):
     res = []
     i, j = len(m)
     while len(res) < 14:
         res.append(m[i][j])
-        
-    
-
-    pass
-        
-    
-        return i
+        if i > j:
+            i +=1
+            j -= 1
+        else:
+            i -=1
+    return res
 
 
 def conversion_binaire_entier(liste_donnees):
@@ -232,8 +251,6 @@ def decoupage46bits(listebits, nbr_elements):
 
     
     
-#correction([1, 1, 0, 0, 0, 1, 0])
-print(decimalToBinary3bits(3))
  
 
 
@@ -247,6 +264,11 @@ def printBeautifulMatrice(a):
         print('  '.join(map(str, line)))
 
 
-
 QRSkeleton(QRMatrix)
+#printBeautifulMatrice(rotate(QRSkeleton(QRMatrix)))
+rotate2()
 printBeautifulMatrice(QRMatrix)
+rotate()
+print("--------------------------------------------------------------------------------")
+printBeautifulMatrice(QRMatrix)
+
