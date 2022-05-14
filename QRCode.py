@@ -1,3 +1,4 @@
+from os import remove
 import tkinter as tk
 from unittest import case
 import PIL as pil
@@ -95,6 +96,7 @@ def rotate(m):
 
     
 def decimalToBinary3bits(n):
+    """convertie une valeur décimale en binaire sur 3 bits"""
     res = []
     n = bin(n).replace("0b", "")
     while len(n) < 3:
@@ -106,13 +108,14 @@ def decimalToBinary3bits(n):
 
 
 def correction(l):
+    t = len(l)
     l_pos = []
     l_bin = []
     aux = 0
     for i in range(len(l)):
         if l[i] == 1:
-            print(len(l) - i)
-            l_pos.append(len(l)-i)
+            print(t - i)
+            l_pos.append(t-i)
     for e in l_pos:
         l_bin.append(decimalToBinary3bits(e))
     for i in range(len(l_bin)):
@@ -127,6 +130,19 @@ def correction(l):
             else:
                 aux += 1
     if aux != 0:
+        l[t - aux - 1 ] = 1 if l[t - aux - 1] == 0 else 0 
+    return [l[0], [1], l[2], l[4]]
+
+
+def readImage(m):
+    res = []
+    i, j = len(m)
+    while len(res) < 14:
+        res.append(m[i][j])
+        
+    
+
+    pass
         
     
 
