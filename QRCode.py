@@ -224,6 +224,7 @@ def correction(l):
 def readInBlock(m, i, j):
     """lecture dans un block de droite à gauche"""
     res = []
+    aux = []
     phase = 0
     while len(res) < 14:
         res.append(m[i][j])
@@ -234,6 +235,13 @@ def readInBlock(m, i, j):
         else:
             i -=1
             phase += 1
+    aux1 = res[:7]
+    aux2 = res[7:]
+    aux = []
+
+    aux.append(code_de_Hamming(aux1))
+
+    aux.append(code_de_Hamming(aux2))
     return res
 
 def readInBlock2(m, i, j):
@@ -249,6 +257,13 @@ def readInBlock2(m, i, j):
         else:
             i -=1
             phase += 1
+
+    aux1 = res[:7]
+    aux2 = res[7:]
+    aux = []
+
+    aux.append(code_de_Hamming(aux1))
+    aux.append(code_de_Hamming(aux2))
     return res
 
 def readEachBlock(m):
