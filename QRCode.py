@@ -230,6 +230,34 @@ def readBlock(m):
             i -=1
     return res
 
+def ascii(liste_donnees):
+    table = ''
+    for code in liste_donnees:
+        bar = conversion_binaire_entier(code)
+        table += chr(bar)
+    return table
+
+def donnees(matrice_image, nbr_total_block, filename):
+    donnees_blocks = ""
+
+    liste_toutes_donnees = []
+
+    for i in range(nbrLig(donnees_blocks)):
+        for j in range(nbrCol(donnees_blocks)):
+            liste_toutes_donnees.append(donnees_blocks[i][j])
+
+    
+    if matrice_image[i][j] == 0:
+        sms = hexadecimaux(liste_toutes_donnees)
+        return sms
+    
+    elif matrice_image[i][j] == 1:
+        sms = ascii(liste_toutes_donnees)
+        return sms
+
+def hexadecimaux(liste_donnees):
+
+    return    
 
 def conversion_binaire_entier(liste_donnees):
     """
@@ -276,11 +304,12 @@ def filtre_damier(QRCode_matrice):
     b = 0
     for i in range(nbrLig(QRCode_matrice)):
         for j in range(nbrCol(QRCode_matrice)):
-            if j >= 7 and i <= 7 :
+            if j >= 11 and i >= 9 :
                 print(QRCode_matrice[i][j])
                 QRCode_matrice[i][j] = QRCode_matrice[i][j] ^ b % 2
                 print(QRCode_matrice[i][j])
                 b += 1
+        b += 1
 
     
     
@@ -290,29 +319,42 @@ def filtre_horizontales(QRCode_matrice):
     b = 0
     for i in range(nbrLig(QRCode_matrice)):
         for j in range(nbrCol(QRCode_matrice)):
-            if 24 > j > 7 and 0 <= i <= 7:
-                QRCode_matrice[i][j] ^= b % 2
-                b += 1
-            elif 24 > i > 7 and 0 <= j <= 7:
-                QRCode_matrice[i][j] ^= b % 2
-                b += 1
+            if j >= 11 and i >= 9:
+                if i % 2 == 1:
+                    b = 0
+                    QRCode_matrice[i][j] ^= b % 2
+                else:
+                    b = 1
+                    QRCode_matrice[i][j] ^= b % 2        
     return QRCode_matrice
 
 
 def filtre_verticales(QRCode_matrice):
     for i in range(nbrLig(QRCode_matrice)):
         for j in range(nbrCol(QRCode_matrice)):
-            if 24 > j > 7 and 0 <= i <= 7:
-                QRCode_matrice[i][j] ^= j % 2
-            elif 24 > i > 7 and 0 <= j <= 7:
-                QRCode_matrice[i][j] ^= j % 2
-    
-    
+            if j >= 11 and i >= 9:
+                if j % 2 == 1:
+                    b = 0
+                    QRCode_matrice[i][j] ^= b % 2
+                else:
+                    b = 1   
+                    QRCode_matrice[i][j] ^= b % 2
     return QRCode_matrice
-    
+
+
+def block_utile(QRCode_matrice):
+    liste = []
+    for i in range(13, 18):
+        liste.append(QRCode_matrice[i][0])
+        nbr_block_utile = conversion_binaire_entier(liste)
+    return nbr_block_utile
+
+
+
 def printBeautifulMatrice(a):
     for line in a:
         print('   '.join(map(str, line)))
+    
 
 
 QRSkeleton(QRMatrix)
