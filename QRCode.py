@@ -35,50 +35,6 @@ def loading(filename):#charge le fichier image filename et renvoie une matrice d
     return m
 
 
-QRMatrix = [[1 for j in range(25)] for i in range(25)]
-TestMatrice = [[j for j in range(25)] for i in range(25)]
-
-
-def QRSkeleton(m):
-    squareInQrcode(m)
-    for i in range(6, len(m)-7, 2):
-        m[i][6] = 0
-        m[6][i] = 0
-
-
-
-def squareInQrcode(m):
-    """créattion squelette de la matrice"""
-    for i in range(len(m)):
-        if i == 0 or i == 6:
-            for j in range(len(m)):
-                if (j >= 0 and j <= 6) or (j >= len(m)-7 and j <= len(m)-1): 
-                    m[i][j] = 0
-        elif i == len(m)-7 or i == len(m)-1:
-            for j in range(7):
-                m[i][j] = 0
-        elif (i >= 2 and i <= 4):
-            for j in range(7):
-                if j == 1 or j == 5:
-                    continue
-                else:
-                    m[i][j] = 0
-                    m[i][len(m)-1-j] = 0
-        elif (i >= len(m)-5 and i <= len(m)-3):
-            for j in range(7):
-                if j == 1 or j == 5:
-                    continue
-                else:
-                    m[i][j] = 0
-        elif i == 1 or i == 5:
-            m[i][0] = 0
-            m[i][6] = 0
-            m[i][len(m)-7] = 0
-            m[i][len(m)-1] = 0
-        elif i == len(m)-6 or i == len(m)-2:
-            m[i][0] = 0
-            m[i][6] = 0
-
 
 def _rotate(m):
     """vérification du sens de la matrice"""
@@ -218,7 +174,7 @@ def correction(l):
 """
 
 def readInBlock(m, i, j):
-    """lecture dans un block de droite à gauche"""
+    """lecture dans un bloc de droite à gauche"""
     res = []
     aux = []
     phase = 0
@@ -231,17 +187,14 @@ def readInBlock(m, i, j):
         else:
             i -=1
             phase += 1
-    aux1 = res[:7]
-    aux2 = res[7:]
-    aux = []
-
-    aux.append(code_de_Hamming(aux1))
-
-    aux.append(code_de_Hamming(aux2))
+    aux1 = code_de_Hamming(res[:7])
+    aux2 = code_de_Hamming(res[7:])
+    aux = aux1 + aux2
+    
     return aux
 
 def readInBlock2(m, i, j):
-    """lecture dans un block de gauche à droite"""
+    """lecture dans un bloc de gauche à droite"""
     res = []
     phase = 0
     while len(res) < 14:
@@ -254,42 +207,18 @@ def readInBlock2(m, i, j):
             i -=1
             phase += 1
 
-    aux1 = res[:7]
-    aux2 = res[7:]
-    aux = []
-
-    aux.append(code_de_Hamming(aux1))
-    aux.append(code_de_Hamming(aux2))
+    aux1 = code_de_Hamming(res[:7])
+    aux2 = code_de_Hamming(res[7:])
+    aux = aux1 + aux2
+    
     return aux
 
 def readEachBlock(m):
-    """lecture block par block"""
+    """lecture bloc par bloc"""
     countdown = 0
     n = len(m)-1
     s = len(m)-1
     res = []
-
-#    i, j = len(m)-1, len(m)-1
-#    x, y = len(m)-3, len(m)-15
-#    while countdown <= 4:
-#        aux, i, j = readInBlock(m, i, j)
-#        res.append(aux)
-#        
-#        aux, i, j = readInBlock(m, i, j)
-#        res.append(aux)
-#        aux, x, y = readInBlock2(m, x, y)
-#
-#        res.append(aux)
-#        aux, x, y = readInBlock2(m, x, y)
-#
-#        res.append(aux)
-#        i -= 3
-#        j = len(m)-1
-#        print(i)
-#        x -= 3
-#        y = len(m)-1
-#        
-#        countdown += 1
 
     while countdown <= 4:
         res.append(readInBlock(m, n, s))
@@ -298,16 +227,20 @@ def readEachBlock(m):
         res.append(readInBlock2(m, n-2, s-6))
         n -= 4
         countdown += 1
+    
+    res = res[:block_utile(m)]
     return res
 
 def ascii(liste_donnees):
+    """Convertion en ascii"""
     table = ''
     for code in liste_donnees:
-        bar = conversion_binaire_entier(code)
-        table += chr(bar)
+        cara = conversion_binaire_entier(code)
+        table += chr(cara)
     return table
 
 def types_donnees(matrice_image):
+    """Choisis entre l'ascii ou l'hexa"""
     donnees_blocks = readEachBlock(matrice_image)
     
     if matrice_image[24][8] == 0:
@@ -319,6 +252,7 @@ def types_donnees(matrice_image):
         return sms
 
 def hexadecimaux(liste_donnees):
+    """Conversion de décimal en hexadécimal"""
     liste = []
     liste2 = []
     for i in range(nbrLig(liste_donnees)):
@@ -327,23 +261,22 @@ def hexadecimaux(liste_donnees):
     sms = ""
     decoupee_liste = decoupage46bits(liste, 4)
     for v in decoupee_liste:
-        print(v)
         liste2.append(conversion_binaire_entier(v))
     for v in liste2:
         if(v<10):
-            sms = str(v)
+            sms += str(v)
         if(v == 10):
-            sms = "A"
+            sms += "A"
         if(v == 11):
-            sms = "B"
+            sms += "B"
         if(v == 12):
-            sms = "C"
+            sms += "C"
         if(v == 13):
-            sms = "D"
+            sms += "D"
         if(v == 14):
-            sms = "E"
+            sms += "E"
         if(v == 15):
-            sms = "F"
+            sms += "F"
     return sms
 
 def conversion_binaire_entier(liste_donnees):
@@ -352,7 +285,7 @@ def conversion_binaire_entier(liste_donnees):
     Réutilisation d'une fonction que l'on a vu en TP. 
     """
     nombre_entier = 0
-    print(liste_donnees)
+
     for a in range(len(liste_donnees)):
         nombre_entier += (liste_donnees[a]*(2**(len(liste_donnees)-a-1)))
     return nombre_entier
@@ -368,10 +301,10 @@ def decoupage46bits(listebits, nbr_elements):
     res = []
     for i in range(0, len(listebits), nbr_elements):
         res.append(listebits[i:(i+nbr_elements)])
-    print(res)
     return res    
 
 def filtre(QRCode_matrice):
+    """Applique le bon filtre à la matrice"""
     if QRCode_matrice[22][8] == 0 and QRCode_matrice[23][8] == 0:
         # filtre noire
         return QRCode_matrice
@@ -389,18 +322,21 @@ def filtre(QRCode_matrice):
 
 
 def filtre_damier(QRCode_matrice):
+    """Applique le filtre damier au à la matrice du QRcode"""
     b = 0
-    for i in range(nbrLig(QRCode_matrice)):
-        for j in range(nbrCol(QRCode_matrice)):
-            if j >= 11 and i >= 9 :
-                QRCode_matrice[i][j] = QRCode_matrice[i][j] ^ b % 2
-                b += 1
+    for i in range(9, nbrLig(QRCode_matrice)):
+        for j in range(11, nbrCol(QRCode_matrice)):
+            a = (QRCode_matrice[i][j]) ^ (b % 2)
+            QRCode_matrice[i][j] = a
+            b += 1
         b += 1
 
     
     return QRCode_matrice
 
+
 def filtre_horizontales(QRCode_matrice):
+    """Applique le filtre horizontal au à la matrice du QRcode"""
     b = 0
     for i in range(nbrLig(QRCode_matrice)):
         for j in range(nbrCol(QRCode_matrice)):
@@ -415,6 +351,7 @@ def filtre_horizontales(QRCode_matrice):
 
 
 def filtre_verticales(QRCode_matrice):
+    """Applique le filtre vertical au à la matrice du QRcode"""
     for i in range(nbrLig(QRCode_matrice)):
         for j in range(nbrCol(QRCode_matrice)):
             if j >= 11 and i >= 9:
@@ -428,6 +365,7 @@ def filtre_verticales(QRCode_matrice):
 
 
 def block_utile(QRCode_matrice):
+    """Limite le nombre de bloc utilisé """
     liste = []
     for i in range(13, 18):
         liste.append(QRCode_matrice[i][0])
@@ -435,8 +373,9 @@ def block_utile(QRCode_matrice):
     return nbr_block_utile
 
 
-
+#fonction utilisé pour tester les codes et bonus
 def printBeautifulMatrice(a):
+    """affiche une belle matrice"""
     for line in a:
         print('   '.join(map(str, line)))
     
@@ -444,6 +383,7 @@ def printBeautifulMatrice(a):
 
 
 def main(filename):
+    """Fonction principale pour lire le qrcode"""
     global QRMatrix
     QRMatrix = loading(filename)
     rotate()
@@ -451,5 +391,71 @@ def main(filename):
     print(types_donnees(QRMatrix))
 
 
+def readQRcode():
+    """Fonction pout faciliter les tests de lecture des QRCodes"""
+    main("qr_code_damier_ascii.png")
+    main("qr_code_ssfiltre_ascii_corrupted.png")
+    main("qr_code_ssfiltre_ascii_rotation.png")
+    main("qr_code_ssfiltre_ascii.png")
+    main("qr_code_ssfiltre_num.png")
 
-main("qr_code_ssfiltre_num.png")
+
+readQRcode()
+
+
+
+###################################################################################################################################
+
+
+#Bonus
+
+QRMatrix = [[1 for j in range(25)] for i in range(25)]
+
+
+def QRSkeleton(m):
+    squareInQrcode(m)
+    for i in range(6, len(m)-7, 2):
+        m[i][6] = 0
+        m[6][i] = 0
+
+
+
+def squareInQrcode(m):
+    """création du squelette de la matrice"""
+    for i in range(len(m)):
+        if i == 0 or i == 6:
+            for j in range(len(m)):
+                if (j >= 0 and j <= 6) or (j >= len(m)-7 and j <= len(m)-1): 
+                    m[i][j] = 0
+        elif i == len(m)-7 or i == len(m)-1:
+            for j in range(7):
+                m[i][j] = 0
+        elif (i >= 2 and i <= 4):
+            for j in range(7):
+                if j == 1 or j == 5:
+                    continue
+                else:
+                    m[i][j] = 0
+                    m[i][len(m)-1-j] = 0
+        elif (i >= len(m)-5 and i <= len(m)-3):
+            for j in range(7):
+                if j == 1 or j == 5:
+                    continue
+                else:
+                    m[i][j] = 0
+        elif i == 1 or i == 5:
+            m[i][0] = 0
+            m[i][6] = 0
+            m[i][len(m)-7] = 0
+            m[i][len(m)-1] = 0
+        elif i == len(m)-6 or i == len(m)-2:
+            m[i][0] = 0
+            m[i][6] = 0
+
+
+def msgToEncode():
+    """Message à convertir en QRCode"""
+    return input("")
+
+
+
