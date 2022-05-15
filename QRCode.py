@@ -5,7 +5,7 @@ from unittest import case
 import PIL as pil
 from PIL import Image
 from PIL import ImageTk 
-from tkinter import filedialog
+from tkinter import N, filedialog
 from tkinter import simpledialog
 import numpy as np
 from copy import deepcopy
@@ -234,8 +234,7 @@ def readInBlock(m, i, j):
         else:
             i -=1
             phase += 1
-    print(i)
-    return res, i, j
+    return res
 
 def readInBlock2(m, i, j):
     """lecture dans un block de gauche à droite"""
@@ -246,36 +245,47 @@ def readInBlock2(m, i, j):
         if phase == 1:
             i +=1
             j += 1
-            phase -= 0
+            phase -= 1
         else:
             i -=1
             phase += 1
-    return res, i, j
+    return res
 
 def readEachBlock(m):
     """lecture block par block"""
     countdown = 0
-    i, j = len(m)-1, len(m)-1
-    x, y = len(m)-3, len(m)-15
+    n = len(m)-1
+    s = len(m)-1
     res = []
+
+#    i, j = len(m)-1, len(m)-1
+#    x, y = len(m)-3, len(m)-15
+#    while countdown <= 4:
+#        aux, i, j = readInBlock(m, i, j)
+#        res.append(aux)
+#        
+#        aux, i, j = readInBlock(m, i, j)
+#        res.append(aux)
+#        aux, x, y = readInBlock2(m, x, y)
+#
+#        res.append(aux)
+#        aux, x, y = readInBlock2(m, x, y)
+#
+#        res.append(aux)
+#        i -= 3
+#        j = len(m)-1
+#        print(i)
+#        x -= 3
+#        y = len(m)-1
+#        
+#        countdown += 1
+
     while countdown <= 4:
-        aux, i, j = readInBlock(m, i, j)
-        res.append(aux)
-        
-        aux, i, j = readInBlock(m, i, j)
-        res.append(aux)
-        aux, x, y = readInBlock2(m, x, y)
-
-        res.append(aux)
-        aux, x, y = readInBlock2(m, x, y)
-
-        res.append(aux)
-        i -= 3
-        j = len(m)-1
-        print(i)
-        x -= 3
-        y = len(m)-1
-        
+        res.append(readInBlock(m, n, s))
+        res.append(readInBlock(m, n, s-7))
+        res.append(readInBlock2(m, n-2, s-13))
+        res.append(readInBlock2(m, n-2, s-6))
+        n -= 4
         countdown += 1
     return res
 
@@ -430,7 +440,11 @@ def printBeautifulMatrice(a):
 
 QRSkeleton(QRMatrix)
 rotate2()
-a, b, c = readInBlock(TestMatrice, len(TestMatrice)-1, len(TestMatrice)-1)
-print(a)
+a = readInBlock(TestMatrice, len(TestMatrice)-1, len(TestMatrice)-1)
+#print(a)
 printBeautifulMatrice(TestMatrice)
 print("--------------------------------------------------------------------------------")
+<<<<<<< Updated upstream
+=======
+printBeautifulMatrice(readEachBlock(TestMatrice))
+>>>>>>> Stashed changes
