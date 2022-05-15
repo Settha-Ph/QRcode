@@ -238,7 +238,7 @@ def readInBlock(m, i, j):
     aux.append(code_de_Hamming(aux1))
 
     aux.append(code_de_Hamming(aux2))
-    return res
+    return aux
 
 def readInBlock2(m, i, j):
     """lecture dans un block de gauche à droite"""
@@ -260,7 +260,7 @@ def readInBlock2(m, i, j):
 
     aux.append(code_de_Hamming(aux1))
     aux.append(code_de_Hamming(aux2))
-    return res
+    return aux
 
 def readEachBlock(m):
     """lecture block par block"""
@@ -327,6 +327,7 @@ def hexadecimaux(liste_donnees):
     sms = ""
     decoupee_liste = decoupage46bits(liste, 4)
     for v in decoupee_liste:
+        print(v)
         liste2.append(conversion_binaire_entier(v))
     for v in liste2:
         if(v<10):
@@ -351,6 +352,7 @@ def conversion_binaire_entier(liste_donnees):
     Réutilisation d'une fonction que l'on a vu en TP. 
     """
     nombre_entier = 0
+    print(liste_donnees)
     for a in range(len(liste_donnees)):
         nombre_entier += (liste_donnees[a]*(2**(len(liste_donnees)-a-1)))
     return nombre_entier
@@ -366,7 +368,7 @@ def decoupage46bits(listebits, nbr_elements):
     res = []
     for i in range(0, len(listebits), nbr_elements):
         res.append(listebits[i:(i+nbr_elements)])
-  
+    print(res)
     return res    
 
 def filtre(QRCode_matrice):
@@ -448,6 +450,6 @@ def main(filename):
     filtre(QRMatrix)
     print(types_donnees(QRMatrix))
 
-    
 
-main("qr_code_ssfiltre_ascii_rotation.png")
+
+main("qr_code_ssfiltre_num.png")
