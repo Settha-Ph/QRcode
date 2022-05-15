@@ -286,8 +286,8 @@ def ascii(liste_donnees):
         table += chr(bar)
     return table
 
-def donnees(matrice_image, nbr_total_block, filename):
-    donnees_blocks = ""
+def types_donnees(matrice_image, nbr_total_block, filename):
+    donnees_blocks = readEachBlock(matrice_image, nbr_total_block, filename)
 
     liste_toutes_donnees = []
 
@@ -305,9 +305,30 @@ def donnees(matrice_image, nbr_total_block, filename):
         return sms
 
 def hexadecimaux(liste_donnees):
-
-    return    
-
+    liste = []
+    liste2 = []
+    for i in range(nbrLig(liste_donnees)):
+        for j in range(nbrCol(liste_donnees)):
+            liste.append(liste_donnees[i][j])
+    sms = ""
+    decoupee_liste = decoupage46bits(liste, 4)
+    for v in decoupee_liste:
+        liste2.append(conversion_binaire_entier(v))
+    for v in liste2:
+        if(v<10):
+            print(str(v), end="")
+        if(v == 10):
+            print('A',end="")
+        if(v == 11):
+            print('B',end="")
+        if(v == 12):
+            print('C',end="")
+        if(v == 13):
+            print('D',end="")
+        if(v == 14):
+            print('E',end="")
+        if(v == 15):
+            print('F',end="")
 
 def conversion_binaire_entier(liste_donnees):
     """
@@ -413,10 +434,3 @@ a, b, c = readInBlock(TestMatrice, len(TestMatrice)-1, len(TestMatrice)-1)
 print(a)
 printBeautifulMatrice(TestMatrice)
 print("--------------------------------------------------------------------------------")
-<<<<<<< Updated upstream
-=======
-
-printBeautifulMatrice(readEachBlock(TestMatrice))
-
-
->>>>>>> Stashed changes
