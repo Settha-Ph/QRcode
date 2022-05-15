@@ -444,7 +444,4 @@ a = readInBlock(TestMatrice, len(TestMatrice)-1, len(TestMatrice)-1)
 #print(a)
 printBeautifulMatrice(TestMatrice)
 print("--------------------------------------------------------------------------------")
-<<<<<<< Updated upstream
-=======
 printBeautifulMatrice(readEachBlock(TestMatrice))
->>>>>>> Stashed changes
