@@ -1,3 +1,4 @@
+from itertools import count
 from os import remove
 import tkinter as tk
 from unittest import case
@@ -35,6 +36,7 @@ def loading(filename):#charge le fichier image filename et renvoie une matrice d
 
 
 QRMatrix = [[1 for j in range(25)] for i in range(25)]
+TestMatrice = [[j for j in range(25)] for i in range(25)]
 
 
 def QRSkeleton(m):
@@ -191,6 +193,7 @@ def code_de_Hamming(liste=[]):
         liste_message.append(liste[i])
     return liste_message
 
+"""
 def correction(l):
     t = len(l)
     l_pos = []
@@ -216,18 +219,64 @@ def correction(l):
     if aux != 0:
         l[t - aux - 1 ] = 1 if l[t - aux - 1] == 0 else 0 
     return [l[0], [1], l[2], l[4]]
+"""
 
-
-def readBlock(m):
+def readInBlock(m, i, j):
+    """lecture dans un block de droite à gauche"""
     res = []
-    i, j = len(m)
+    phase = 0
     while len(res) < 14:
         res.append(m[i][j])
-        if i > j:
+        if phase == 1:
             i +=1
             j -= 1
+            phase -= 1
         else:
             i -=1
+            phase += 1
+    print(i)
+    return res, i, j
+
+def readInBlock2(m, i, j):
+    """lecture dans un block de gauche à droite"""
+    res = []
+    phase = 0
+    while len(res) < 14:
+        res.append(m[i][j])
+        if phase == 1:
+            i +=1
+            j += 1
+            phase -= 0
+        else:
+            i -=1
+            phase += 1
+    return res, i, j
+
+def readEachBlock(m):
+    """lecture block par block"""
+    countdown = 0
+    i, j = len(m)-1, len(m)-1
+    x, y = len(m)-3, len(m)-15
+    res = []
+    while countdown <= 4:
+        aux, i, j = readInBlock(m, i, j)
+        res.append(aux)
+        
+        aux, i, j = readInBlock(m, i, j)
+        res.append(aux)
+        aux, x, y = readInBlock2(m, x, y)
+
+        res.append(aux)
+        aux, x, y = readInBlock2(m, x, y)
+
+        res.append(aux)
+        i -= 3
+        j = len(m)-1
+        print(i)
+        x -= 3
+        y = len(m)-1
+        
+        countdown += 1
     return res
 
 def ascii(liste_donnees):
@@ -258,6 +307,7 @@ def donnees(matrice_image, nbr_total_block, filename):
 def hexadecimaux(liste_donnees):
 
     return    
+
 
 def conversion_binaire_entier(liste_donnees):
     """
@@ -358,11 +408,15 @@ def printBeautifulMatrice(a):
 
 
 QRSkeleton(QRMatrix)
-#printBeautifulMatrice(rotate(QRSkeleton(QRMatrix)))
 rotate2()
-
-
-
-printBeautifulMatrice(QRMatrix)
-rotate()
+a, b, c = readInBlock(TestMatrice, len(TestMatrice)-1, len(TestMatrice)-1)
+print(a)
+printBeautifulMatrice(TestMatrice)
 print("--------------------------------------------------------------------------------")
+<<<<<<< Updated upstream
+=======
+
+printBeautifulMatrice(readEachBlock(TestMatrice))
+
+
+>>>>>>> Stashed changes
