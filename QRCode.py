@@ -112,7 +112,6 @@ def _rotate(m):
 
         if not res:
             break
-    print(res)
     return res
 
 def rotate():
@@ -121,13 +120,10 @@ def rotate():
     aux = [[1] *(len(QRMatrix)) for j in range(len(QRMatrix))]
     test =_rotate(QRMatrix)
     while test:
-        print("coucou")
-        print("----------------------------------------------------------------------------------------------------------------------------------------")
         for i in range(len(QRMatrix)):
             for j in range(len(QRMatrix)):
                 aux[i][j] = QRMatrix[len(QRMatrix)-j-1][i]
         QRMatrix = deepcopy(aux) 
-        printBeautifulMatrice(QRMatrix)
         test =_rotate(QRMatrix)
         
 
@@ -311,22 +307,15 @@ def ascii(liste_donnees):
         table += chr(bar)
     return table
 
-def types_donnees(matrice_image, nbr_total_block, filename):
-    donnees_blocks = readEachBlock(matrice_image, nbr_total_block, filename)
-
-    liste_toutes_donnees = []
-
-    for i in range(nbrLig(donnees_blocks)):
-        for j in range(nbrCol(donnees_blocks)):
-            liste_toutes_donnees.append(donnees_blocks[i][j])
-
+def types_donnees(matrice_image):
+    donnees_blocks = readEachBlock(matrice_image)
     
-    if matrice_image[i][j] == 0:
-        sms = hexadecimaux(liste_toutes_donnees)
+    if matrice_image[24][8] == 0:
+        sms = hexadecimaux(donnees_blocks)
         return sms
     
-    elif matrice_image[i][j] == 1:
-        sms = ascii(liste_toutes_donnees)
+    elif matrice_image[24][8] == 1:
+        sms = ascii(donnees_blocks)
         return sms
 
 def hexadecimaux(liste_donnees):
@@ -341,19 +330,20 @@ def hexadecimaux(liste_donnees):
         liste2.append(conversion_binaire_entier(v))
     for v in liste2:
         if(v<10):
-            print(str(v), end="")
+            sms = str(v)
         if(v == 10):
-            print('A',end="")
+            sms = "A"
         if(v == 11):
-            print('B',end="")
+            sms = "B"
         if(v == 12):
-            print('C',end="")
+            sms = "C"
         if(v == 13):
-            print('D',end="")
+            sms = "D"
         if(v == 14):
-            print('E',end="")
+            sms = "E"
         if(v == 15):
-            print('F',end="")
+            sms = "F"
+    return sms
 
 def conversion_binaire_entier(liste_donnees):
     """
@@ -380,20 +370,20 @@ def decoupage46bits(listebits, nbr_elements):
     return res    
 
 def filtre(QRCode_matrice):
-    if QRCode_matrice[23][8] == 0 and QRCode_matrice[22][8] == 0:
+    if QRCode_matrice[22][8] == 0 and QRCode_matrice[23][8] == 0:
         # filtre noire
         return QRCode_matrice
-    if QRCode_matrice[23][8] == 0 and QRCode_matrice[22][8] == 1:
+    if QRCode_matrice[22][8] == 0 and QRCode_matrice[23][8] == 1:
         # filte damier
-        QRMatrix_avec_filte = filtre_damier(QRCode_matrice) 
-    if QRCode_matrice[23][8] == 1 and QRCode_matrice[22][8] == 0:
+        QRMatrix_avec_filtre = filtre_damier(QRCode_matrice) 
+    if QRCode_matrice[22][8] == 1 and QRCode_matrice[23][8] == 0:
         # filtre horizontales
-        QRMatrix_avec_filte = filtre_horizontales(QRCode_matrice) 
-    if QRCode_matrice[23][8] == 1 and QRCode_matrice[22][8] == 1:
+        QRMatrix_avec_filtre = filtre_horizontales(QRCode_matrice) 
+    if QRCode_matrice[22][8] == 1 and QRCode_matrice[23][8] == 1:
         # filtre verticales
-        QRMatrix_avec_filte = filtre_verticales(QRCode_matrice) 
+        QRMatrix_avec_filtre = filtre_verticales(QRCode_matrice) 
 
-    return QRCode_matrice
+    return QRMatrix_avec_filtre
 
 
 def filtre_damier(QRCode_matrice):
@@ -401,13 +391,10 @@ def filtre_damier(QRCode_matrice):
     for i in range(nbrLig(QRCode_matrice)):
         for j in range(nbrCol(QRCode_matrice)):
             if j >= 11 and i >= 9 :
-                print(QRCode_matrice[i][j])
                 QRCode_matrice[i][j] = QRCode_matrice[i][j] ^ b % 2
-                print(QRCode_matrice[i][j])
                 b += 1
         b += 1
 
-    
     
     return QRCode_matrice
 
@@ -421,7 +408,7 @@ def filtre_horizontales(QRCode_matrice):
                     QRCode_matrice[i][j] ^= b % 2
                 else:
                     b = 1
-                    QRCode_matrice[i][j] ^= b % 2        
+                    QRCode_matrice[i][j] ^= b % 2       
     return QRCode_matrice
 
 
@@ -453,10 +440,14 @@ def printBeautifulMatrice(a):
     
 
 
-QRSkeleton(QRMatrix)
-rotate2()
-a = readInBlock(TestMatrice, len(TestMatrice)-1, len(TestMatrice)-1)
-#print(a)
-printBeautifulMatrice(TestMatrice)
-print("--------------------------------------------------------------------------------")
-printBeautifulMatrice(readEachBlock(TestMatrice))
+
+def main(filename):
+    global QRMatrix
+    QRMatrix = loading(filename)
+    rotate()
+    filtre(QRMatrix)
+    print(types_donnees(QRMatrix))
+
+    
+
+main("qr_code_ssfiltre_ascii_rotation.png")
