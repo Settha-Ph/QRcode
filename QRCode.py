@@ -1,3 +1,4 @@
+from os import remove
 import tkinter as tk
 from unittest import case
 import PIL as pil
@@ -33,14 +34,14 @@ def loading(filename):#charge le fichier image filename et renvoie une matrice d
     return m
 
 
-QRMatrix = [[0 for j in range(25)] for i in range(25)]
+QRMatrix = [[1 for j in range(25)] for i in range(25)]
 
 
 def QRSkeleton(m):
     squareInQrcode(m)
     for i in range(6, len(m)-7, 2):
-        m[i][6] = 1
-        m[6][i] = 1
+        m[i][6] = 0
+        m[6][i] = 0
 
 
 
@@ -50,76 +51,103 @@ def squareInQrcode(m):
         if i == 0 or i == 6:
             for j in range(len(m)):
                 if (j >= 0 and j <= 6) or (j >= len(m)-7 and j <= len(m)-1): 
-                    m[i][j] = 1
+                    m[i][j] = 0
         elif i == len(m)-7 or i == len(m)-1:
             for j in range(7):
-                m[i][j] = 1
+                m[i][j] = 0
         elif (i >= 2 and i <= 4):
             for j in range(7):
                 if j == 1 or j == 5:
                     continue
                 else:
-                    m[i][j] = 1
-                    m[i][len(m)-1-j] = 1
+                    m[i][j] = 0
+                    m[i][len(m)-1-j] = 0
         elif (i >= len(m)-5 and i <= len(m)-3):
             for j in range(7):
                 if j == 1 or j == 5:
                     continue
                 else:
-                    m[i][j] = 1
+                    m[i][j] = 0
         elif i == 1 or i == 5:
-            m[i][0] = 1
-            m[i][6] = 1
-            m[i][len(m)-7] = 1
-            m[i][len(m)-1] = 1
+            m[i][0] = 0
+            m[i][6] = 0
+            m[i][len(m)-7] = 0
+            m[i][len(m)-1] = 0
         elif i == len(m)-6 or i == len(m)-2:
-            m[i][0] = 1
-            m[i][6] = 1
+            m[i][0] = 0
+            m[i][6] = 0
 
 
 def _rotate(m):
     """vérification du sens de la matrice"""
+    global QRMatrix
     res = True
     n = len(m)-1
-    for i in range(7):
-        for j in range(7):
+    for i in range(len(m)-7, len(m)):
+        for j in range(len(m)-7, len(m)):
             if i == n-6 or i == n:
-                if m[i][j] != 1:
+                if m[i][j] != 0:
                     res = False
                     break
             elif i == n-5 or i == n-1:
                 if j == n-6 or j == n:
-                    if m[i][j] != 1:
+                    if m[i][j] != 0:
                         res = False
                         break
                 elif j >=n-5 and j <= n-1:
-                    if m[i][j] != 0:
+                    if m[i][j] != 1:
                         res = False
                         break
             elif i >= n-4 and i <= n-2:
                 if j == n-6 or j == n or (j >=n-4 and j <= n-2):
-                    if m[i][j] != 1:
+                    if m[i][j] != 0:
                         res = False
                         break
                 else:
-                    if m[i][j] != 0:
+                    if m[i][j] != 1:
                         res = False
                         break
 
         if not res:
             break
+    print(res)
     return res
 
-
-def rotate(m):
+def rotate():
+    global QRMatrix
     """rotation à droite de la matrice tant qu'elle n'est pas dans le bon sens"""
-    while not _rotate(m):
-        for i in range(len(m)):
-            for j in range(len(m)):
-                m[i][j] = m[len(m)-j-1][i]
+    aux = [[1] *(len(QRMatrix)) for j in range(len(QRMatrix))]
+    test =_rotate(QRMatrix)
+    while test:
+        print("coucou")
+        print("----------------------------------------------------------------------------------------------------------------------------------------")
+        for i in range(len(QRMatrix)):
+            for j in range(len(QRMatrix)):
+                aux[i][j] = QRMatrix[len(QRMatrix)-j-1][i]
+        QRMatrix = deepcopy(aux) 
+        printBeautifulMatrice(QRMatrix)
+        test =_rotate(QRMatrix)
+        
+
+ 
+
+    
+
+def rotate2():
+    global QRMatrix
+    """rotation à droite de la matrice tant qu'elle n'est pas dans le bon sens"""
+    aux = [[1] *(len(QRMatrix)) for j in range(len(QRMatrix))]
+
+    for i in range(len(QRMatrix)):
+        for j in range(len(QRMatrix)):
+            aux[i][j] = QRMatrix[len(QRMatrix)-j-1][i]
+
+    QRMatrix = aux.copy()
+  
 
     
 def decimalToBinary3bits(n):
+    """convertie une valeur décimale en binaire sur 3 bits"""
     res = []
     n = bin(n).replace("0b", "")
     while len(n) < 3:
@@ -164,13 +192,14 @@ def code_de_Hamming(liste=[]):
     return liste_message
 
 def correction(l):
+    t = len(l)
     l_pos = []
     l_bin = []
     aux = 0
     for i in range(len(l)):
         if l[i] == 1:
-            print(len(l) - i)
-            l_pos.append(len(l)-i)
+            print(t - i)
+            l_pos.append(t-i)
     for e in l_pos:
         l_bin.append(decimalToBinary3bits(e))
     for i in range(len(l_bin)):
@@ -185,7 +214,21 @@ def correction(l):
             else:
                 aux += 1
     if aux != 0:
-        return i
+        l[t - aux - 1 ] = 1 if l[t - aux - 1] == 0 else 0 
+    return [l[0], [1], l[2], l[4]]
+
+
+def readBlock(m):
+    res = []
+    i, j = len(m)
+    while len(res) < 14:
+        res.append(m[i][j])
+        if i > j:
+            i +=1
+            j -= 1
+        else:
+            i -=1
+    return res
 
 
 def conversion_binaire_entier(liste_donnees):
@@ -210,25 +253,74 @@ def decoupage46bits(listebits, nbr_elements):
     for i in range(0, len(listebits), nbr_elements):
         res.append(listebits[i:(i+nbr_elements)])
   
-    return res      
+    return res    
+
+def filtre(QRCode_matrice):
+    if QRCode_matrice[23][8] == 0 and QRCode_matrice[22][8] == 0:
+        # filtre noire
+        return QRCode_matrice
+    if QRCode_matrice[23][8] == 0 and QRCode_matrice[22][8] == 1:
+        # filte damier
+        QRMatrix_avec_filte = filtre_damier(QRCode_matrice) 
+    if QRCode_matrice[23][8] == 1 and QRCode_matrice[22][8] == 0:
+        # filtre horizontales
+        QRMatrix_avec_filte = filtre_horizontales(QRCode_matrice) 
+    if QRCode_matrice[23][8] == 1 and QRCode_matrice[22][8] == 1:
+        # filtre verticales
+        QRMatrix_avec_filte = filtre_verticales(QRCode_matrice) 
+
+    return QRCode_matrice
+
+
+def filtre_damier(QRCode_matrice):
+    b = 0
+    for i in range(nbrLig(QRCode_matrice)):
+        for j in range(nbrCol(QRCode_matrice)):
+            if j >= 7 and i <= 7 :
+                print(QRCode_matrice[i][j])
+                QRCode_matrice[i][j] = QRCode_matrice[i][j] ^ b % 2
+                print(QRCode_matrice[i][j])
+                b += 1
 
     
     
-#correction([1, 1, 0, 0, 0, 1, 0])
-print(decimalToBinary3bits(3))
- 
+    return QRCode_matrice
+
+def filtre_horizontales(QRCode_matrice):
+    b = 0
+    for i in range(nbrLig(QRCode_matrice)):
+        for j in range(nbrCol(QRCode_matrice)):
+            if 24 > j > 7 and 0 <= i <= 7:
+                QRCode_matrice[i][j] ^= b % 2
+                b += 1
+            elif 24 > i > 7 and 0 <= j <= 7:
+                QRCode_matrice[i][j] ^= b % 2
+                b += 1
+    return QRCode_matrice
 
 
-        
-            
-            
-
-
+def filtre_verticales(QRCode_matrice):
+    for i in range(nbrLig(QRCode_matrice)):
+        for j in range(nbrCol(QRCode_matrice)):
+            if 24 > j > 7 and 0 <= i <= 7:
+                QRCode_matrice[i][j] ^= j % 2
+            elif 24 > i > 7 and 0 <= j <= 7:
+                QRCode_matrice[i][j] ^= j % 2
+    
+    
+    return QRCode_matrice
+    
 def printBeautifulMatrice(a):
     for line in a:
-        print('  '.join(map(str, line)))
-
+        print('   '.join(map(str, line)))
 
 
 QRSkeleton(QRMatrix)
+#printBeautifulMatrice(rotate(QRSkeleton(QRMatrix)))
+rotate2()
+
+
+
 printBeautifulMatrice(QRMatrix)
+rotate()
+print("--------------------------------------------------------------------------------")
